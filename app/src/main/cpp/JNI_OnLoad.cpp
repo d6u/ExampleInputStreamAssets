@@ -36,7 +36,14 @@ Java_com_example_inputstreamassets_MainActivity_init(JNIEnv *env, jobject,
     AssetIStream input_stream(asset_manager, "text/numbers.txt", AASSET_MODE_BUFFER);
 
     std::string line;
-    while (std::getline(input_stream, line)) {
-        __android_log_print(ANDROID_LOG_DEBUG, "native", "line %s", line.c_str());
-    }
+    std::getline(input_stream, line);
+    __android_log_print(ANDROID_LOG_DEBUG, "native", "line %s", line.c_str());
+    std::getline(input_stream, line);
+    __android_log_print(ANDROID_LOG_DEBUG, "native", "line %s | peek %c", line.c_str(), input_stream.peek());
+
+    input_stream.seekg(11);
+    std::getline(input_stream, line);
+    __android_log_print(ANDROID_LOG_DEBUG, "native", "line %s", line.c_str());
+    std::getline(input_stream, line);
+    __android_log_print(ANDROID_LOG_DEBUG, "native", "line %s", line.c_str());
 }

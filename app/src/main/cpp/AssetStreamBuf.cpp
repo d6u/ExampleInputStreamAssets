@@ -18,7 +18,7 @@ int AssetStreamBuf::underflow() {
     // gptr() returns pointer to current character of the get area
     // egptr() returns pointer to the end of the get area
     if (gptr() < egptr()) {
-        __android_log_print(ANDROID_LOG_DEBUG, "native", "Buffer not exhausted");
+        __android_log_print(ANDROID_LOG_DEBUG, "native", "underflow: Buffer not exhausted");
         // Buffer not exhausted
         return traits_type::to_int_type(*gptr());
     }
@@ -36,7 +36,7 @@ int AssetStreamBuf::underflow() {
                         buffer_size - put_back_size);
 
     if (n <= 0) {
-        __android_log_print(ANDROID_LOG_DEBUG, "native", "EOF");
+        __android_log_print(ANDROID_LOG_DEBUG, "native", "underflow: EOF");
         // EOF or error
         return traits_type::eof();
     }
@@ -46,4 +46,48 @@ int AssetStreamBuf::underflow() {
          buffer_ + put_back_size + n);
 
     return traits_type::to_int_type(*gptr());
+}
+
+// Called by two arguments version of istream::seekg()
+AssetStreamBuf::pos_type
+AssetStreamBuf::seekoff(off_type off, std::ios::seekdir way, std::ios::openmode mode) {
+    __android_log_print(ANDROID_LOG_DEBUG, "native", "seekoff %lld %d", off, way);
+
+    switch (way) {
+        case std::ios::beg: {
+            __android_log_print(ANDROID_LOG_DEBUG, "native", "seekoff beg");
+            char *end = buffer_ + buffer_size;
+            setg(end, end, end);
+            return AAsset_seek64(asset_, off, SEEK_SET);
+        }
+        case std::ios::cur: {
+            __android_log_print(ANDROID_LOG_DEBUG, "native", "seekoff cur");
+            if (gptr() + off >= eback() && gptr() + off <= egptr()) {
+                __android_log_print(ANDROID_LOG_DEBUG, "native", "seekoff cur within range");
+                setg(eback(), gptr() + off, egptr());
+                return AAsset_getLength64(asset_) - AAsset_getRemainingLength64(asset_);
+            } else {
+                __android_log_print(ANDROID_LOG_DEBUG, "native", "seekoff cur out of range");
+                char *end = buffer_ + buffer_size;
+                setg(end, end, end);
+                // Subtract two pointer first to invoke defined behavior of pointer subtraction
+                off64_t offset = gptr() - egptr() + off;
+                return AAsset_seek64(asset_, offset, SEEK_CUR);
+            }
+        }
+        case std::ios::end: {
+            __android_log_print(ANDROID_LOG_DEBUG, "native", "seekoff end");
+            char *end = buffer_ + buffer_size;
+            setg(end, end, end);
+            return AAsset_seek64(asset_, off, SEEK_END);
+        }
+        default:
+            return -1;
+    }
+}
+
+// Called by single argument version of istream::seekg()
+AssetStreamBuf::pos_type AssetStreamBuf::seekpos(pos_type sp, std::ios::openmode mode) {
+    __android_log_print(ANDROID_LOG_DEBUG, "native", "seekpos %lld", sp - pos_type(0));
+    return seekoff(sp - pos_type(0), std::ios_base::beg, mode);
 }
