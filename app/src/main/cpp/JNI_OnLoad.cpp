@@ -31,7 +31,7 @@ Java_com_example_inputstreamassets_MainActivity_init(JNIEnv *env, jobject, jobje
 
     // Use custom class
 
-    AssetIStream input_stream(asset_manager, "text/numbers.txt", AASSET_MODE_STREAMING);
+    AssetIStream input_stream(asset_manager, "text/numbers.txt");
 
     std::string line;
     std::getline(input_stream, line);

@@ -5,7 +5,7 @@
 
 class AssetStreamBuf : public std::streambuf {
 public:
-    explicit AssetStreamBuf(AAssetManager *asset_manager, const char *filename, int mode);
+    explicit AssetStreamBuf(AAssetManager *asset_manager, const char *filename);
 
     ~AssetStreamBuf() override;
 

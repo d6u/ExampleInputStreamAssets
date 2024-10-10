@@ -7,7 +7,8 @@
 
 class AssetIStream : public std::istream {
 public:
-    explicit AssetIStream(AAssetManager *asset_manager, const char *filename, int mode);
+    explicit AssetIStream(AAssetManager *asset_manager, const char *filename);
+
 private:
     AssetStreamBuf buffer_;
 };

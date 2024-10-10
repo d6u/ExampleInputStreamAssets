@@ -2,8 +2,8 @@
 
 #include <android/log.h>
 
-AssetStreamBuf::AssetStreamBuf(AAssetManager *asset_manager, const char *filename, int mode) {
-    asset_ = AAssetManager_open(asset_manager, filename, mode);
+AssetStreamBuf::AssetStreamBuf(AAssetManager *asset_manager, const char *filename) {
+    asset_ = AAssetManager_open(asset_manager, filename, AASSET_MODE_STREAMING);
 
     char *end = buffer_ + buffer_size;
     // Set beginning, next and end pointer.
